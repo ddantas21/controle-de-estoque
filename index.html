@@ -3,760 +3,615 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Controle de Estoque - Supermercado</title>
+    <title>Controle de Estoque - Supermercado</title>
 
-  <style>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    :root {
-      --primary: #1e3a8a;
-      --secondary: #2563eb;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
-      margin: 0;
-      padding: 20px;
-    }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
 
-    header {
-      max-width: 1200px;
-      margin: 0 auto 30px auto;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
+        header h1 {
+            margin: 0 0 15px 0;
+        }
 
-    h1 {
-      margin: 0;
-      color: var(--primary);
-    }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
 
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        button:hover {
+            background-color: #2980b9;
+        }
 
-    button {
-      background-color: var(--secondary);
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: opacity 0.2s;
-    }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
 
-    button:hover {
-      opacity: 0.9;
-    }
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
 
-    button.btn-warning {
-      background-color: var(--warning);
-    }
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
 
-    button.btn-success {
-      background-color: var(--success);
-    }
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
 
-    button.btn-danger {
-      background-color: var(--danger);
-    }
+        .card p {
+            margin: 8px 0;
+        }
 
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+        .estoque {
+            font-weight: bold;
+            color: #27ae60;
+        }
 
-    .card {
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #e2e8f0;
-    }
+        .movimento {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-    .card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
+        /* MODAL */
 
-    .card-body {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-grow: 1;
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
 
-    .card-title {
-      margin: 0 0 5px 0;
-      font-size: 1.1rem;
-      color: var(--primary);
-    }
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 10px;
+        }
 
-    .badge-unidade {
-      align-self: flex-start;
-      background-color: #e0e7ff;
-      color: #3730a3;
-      font-size: 0.8rem;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 600;
-    }
+        .modal-content h2 {
+            text-align: center;
+        }
 
-    .card-info {
-      font-size: 0.9rem;
-      color: #475569;
-    }
+        .modal-content label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
 
-    .card-control {
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid #f1f5f9;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-    .card-control label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #334155;
-    }
+        .modal-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-    .card-control input[type="number"] {
-      padding: 8px;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      font-size: 0.95rem;
-    }
+        .btn-cancelar {
+            background-color: #e74c3c;
+        }
 
-    /* MODAL */
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-
-      background: rgba(0, 0, 0, 0.5);
-
-      display: none;
-
-      justify-content: center;
-      align-items: center;
-
-      z-index: 1000;
-    }
-
-    .modal {
-      background: white;
-      padding: 25px;
-      border-radius: 8px;
-
-      width: 90%;
-      max-width: 450px;
-
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal h2 {
-      margin-top: 0;
-      color: var(--primary);
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 0.9rem;
-      color: #333;
-      font-weight: 600;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-
-      border: 1px solid #ccc;
-      border-radius: 4px;
-
-      font-size: 0.95rem;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-cancel {
-      background-color: var(--danger);
-    }
-
-  </style>
-
+        .btn-cancelar:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 
 <body>
 
-  <header>
+    <header>
 
-    <h1>Controle de Estoque</h1>
+        <h1>Controle de Estoque - Supermercado</h1>
 
-    <div class="btn-group">
+        <button onclick="carregarEstoque()">
+            Carregar estoque
+        </button>
 
-      <!-- BOTÃO INCLUIR PRODUTO -->
-      <button onclick="abrirModalProduto()">
-        Incluir Produto
-      </button>
-
-      <button onclick="carregarEstoque()">
-        Carregar estoque
-      </button>
-
-      <button class="btn-warning" onclick="atualizarEstoque()">
-        Atualizar estoque
-      </button>
-
-      <button class="btn-success" onclick="salvarEstoque()">
-        Salvar estoque
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <!-- LISTA DE PRODUTOS -->
-
-  <main
-    class="grid-container"
-    id="gridProdutos">
-  </main>
-
-
-  <!-- MODAL PARA INCLUIR PRODUTO -->
-
-  <div
-    class="modal-overlay"
-    id="modalProduto">
-
-    <div class="modal">
-
-      <h2>Incluir Novo Produto</h2>
-
-      <form
-        id="formProduto"
-        onsubmit="incluirProduto(event)">
-
-        <div class="form-group">
-
-          <label for="nomeProduto">
-            Nome do Produto:
-          </label>
-
-          <input
-            type="text"
-            id="nomeProduto"
-            required>
-
-        </div>
-
-
-        <div class="form-group">
-
-          <label for="fotoProduto">
-            URL da Foto:
-          </label>
-
-          <input
-            type="url"
-            id="fotoProduto"
-            placeholder="https://..."
-            required>
-
-        </div>
-
-
-        <div class="form-group">
-
-          <label for="precoCompra">
-            Preço de Compra:
-          </label>
-
-          <input
-            type="number"
-            id="precoCompra"
-            step="0.01"
-            min="0"
-            required>
-
-        </div>
-
-
-        <div class="form-group">
-
-          <label for="precoVenda">
-            Preço de Venda:
-          </label>
-
-          <input
-            type="number"
-            id="precoVenda"
-            step="0.01"
-            min="0"
-            required>
-
-        </div>
-
-
-        <div class="form-group">
-
-          <label for="quantidadeEstoque">
-            Quantidade em Estoque:
-          </label>
-
-          <input
-            type="number"
-            id="quantidadeEstoque"
-            min="0"
-            step="1"
-            required>
-
-        </div>
-
-
-        <div class="form-group">
-
-          <label for="unidade">
-            Unidade:
-          </label>
-
-          <input
-            type="text"
-            id="unidade"
-            placeholder="Ex: Caixa, Pacote, Unidade..."
-            required>
-
-        </div>
-
-
-        <div class="modal-actions">
-
-          <button
-            type="button"
-            class="btn-cancel"
-            onclick="fecharModalProduto()">
-
-            Cancelar
-
-          </button>
-
-          <button type="submit">
-
+        <button onclick="abrirModalProduto()">
             Incluir Produto
+        </button>
 
-          </button>
+        <button onclick="atualizarEstoque()">
+            Atualizar estoque
+        </button>
+
+        <button onclick="salvarEstoque()">
+            Salvar estoque
+        </button>
+
+    </header>
+
+    <main
+        class="grid-container"
+        id="gridProdutos">
+    </main>
+
+
+    <!-- MODAL PARA INCLUIR PRODUTO -->
+
+    <div
+        class="modal"
+        id="modalProduto">
+
+        <div class="modal-content">
+
+            <h2>Incluir Produto</h2>
+
+            <form
+                id="formProduto"
+                onsubmit="incluirProduto(event)">
+
+                <label for="nomeProduto">
+                    Nome do produto:
+                </label>
+
+                <input
+                    type="text"
+                    id="nomeProduto"
+                    required>
+
+
+                <label for="fotoProduto">
+                    URL da foto:
+                </label>
+
+                <input
+                    type="url"
+                    id="fotoProduto"
+                    required>
+
+
+                <label for="precoCompra">
+                    Preço de compra:
+                </label>
+
+                <input
+                    type="number"
+                    id="precoCompra"
+                    step="0.01"
+                    min="0"
+                    required>
+
+
+                <label for="precoVenda">
+                    Preço de venda:
+                </label>
+
+                <input
+                    type="number"
+                    id="precoVenda"
+                    step="0.01"
+                    min="0"
+                    required>
+
+
+                <label for="quantidadeEstoque">
+                    Quantidade em estoque:
+                </label>
+
+                <input
+                    type="number"
+                    id="quantidadeEstoque"
+                    min="0"
+                    required>
+
+
+                <label for="unidade">
+                    Unidade:
+                </label>
+
+                <input
+                    type="text"
+                    id="unidade"
+                    required>
+
+
+                <div class="modal-buttons">
+
+                    <button type="submit">
+                        Incluir Produto
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn-cancelar"
+                        onclick="fecharModalProduto()">
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </form>
 
         </div>
 
-      </form>
-
     </div>
 
-  </div>
 
+    <script>
 
-  <script>
+        let produtosData = [];
 
-    // Array que guarda os produtos
-    let produtosData = [];
 
+        // ============================
+        // CARREGAR ESTOQUE
+        // ============================
 
-    // ========================================
-    // CARREGAR ESTOQUE
-    // ========================================
+        async function carregarEstoque() {
 
-    async function carregarEstoque() {
+            try {
 
-      try {
+                const response =
+                    await fetch("estoque.json");
 
-        const response =
-          await fetch('estoque.json');
+                produtosData =
+                    await response.json();
 
-        produtosData =
-          await response.json();
+                renderizarCards();
 
-        renderizarCards();
+            } catch (erro) {
 
-      }
+                console.error(erro);
 
-      catch (error) {
+                alert(
+                    "Erro ao carregar o arquivo estoque.json"
+                );
 
-        console.error(
-          'Erro ao carregar o estoque:',
-          error
-        );
-
-        alert(
-          'Não foi possível carregar o arquivo estoque.json.'
-        );
-
-      }
-
-    }
-
-
-    // ========================================
-    // RENDERIZAR CARDS
-    // ========================================
-
-    function renderizarCards() {
-
-      const container =
-        document.getElementById(
-          'gridProdutos'
-        );
-
-      container.innerHTML = '';
-
-
-      produtosData.forEach(produto => {
-
-        const card =
-          document.createElement('div');
-
-        card.className = 'card';
-
-
-        card.innerHTML = `
-
-          <img
-            src="${produto.foto}"
-            alt="${produto.nome}">
-
-          <div class="card-body">
-
-            <span class="badge-unidade">
-              ${produto.unidade}
-            </span>
-
-            <h3 class="card-title">
-              ${produto.nome}
-            </h3>
-
-            <div class="card-info">
-              <strong>Preço de Compra:</strong>
-              R$ ${produto.precoCompra.toFixed(2)}
-            </div>
-
-            <div class="card-info">
-              <strong>Preço de Venda:</strong>
-              R$ ${produto.precoVenda.toFixed(2)}
-            </div>
-
-            <div class="card-info">
-              <strong>Estoque Atual:</strong>
-              ${produto.quantidadeEstoque}
-            </div>
-
-            <div class="card-control">
-
-              <label
-                for="mov-${produto.id}">
-
-                Entrada / Saída
-                (negativo):
-
-              </label>
-
-              <input
-                type="number"
-                id="mov-${produto.id}"
-                value="0"
-                step="1"
-                placeholder="Ex: 5 ou -3">
-
-            </div>
-
-          </div>
-
-        `;
-
-
-        container.appendChild(card);
-
-      });
-
-    }
-
-
-    // ========================================
-    // ABRIR MODAL
-    // ========================================
-
-    function abrirModalProduto() {
-
-      document
-        .getElementById('modalProduto')
-        .style.display = 'flex';
-
-    }
-
-
-    // ========================================
-    // FECHAR MODAL
-    // ========================================
-
-    function fecharModalProduto() {
-
-      document
-        .getElementById('modalProduto')
-        .style.display = 'none';
-
-
-      document
-        .getElementById('formProduto')
-        .reset();
-
-    }
-
-
-    // ========================================
-    // FUNÇÃO INCLUIR PRODUTO()
-    // ========================================
-
-    function incluirProduto(event) {
-
-      // Impede o formulário de atualizar a página
-      event.preventDefault();
-
-
-      // Pega os valores digitados
-      const nome =
-        document
-          .getElementById('nomeProduto')
-          .value
-          .trim();
-
-
-      const foto =
-        document
-          .getElementById('fotoProduto')
-          .value
-          .trim();
-
-
-      const precoCompra =
-        parseFloat(
-          document
-            .getElementById('precoCompra')
-            .value
-        );
-
-
-      const precoVenda =
-        parseFloat(
-          document
-            .getElementById('precoVenda')
-            .value
-        );
-
-
-      const quantidadeEstoque =
-        parseInt(
-          document
-            .getElementById('quantidadeEstoque')
-            .value,
-          10
-        );
-
-
-      const unidade =
-        document
-          .getElementById('unidade')
-          .value
-          .trim();
-
-
-      // Cria o novo produto
-      const novoProduto = {
-
-        id: Date.now(),
-
-        nome: nome,
-
-        foto: foto,
-
-        precoCompra: precoCompra,
-
-        precoVenda: precoVenda,
-
-        quantidadeEstoque:
-          quantidadeEstoque,
-
-        unidade: unidade
-
-      };
-
-
-      // Adiciona o produto
-      // ao array
-      produtosData.push(novoProduto);
-
-
-      // Atualiza a tela
-      renderizarCards();
-
-
-      // Fecha o formulário
-      fecharModalProduto();
-
-
-      // Mensagem
-      alert(
-        'Produto incluído com sucesso!'
-      );
-
-    }
-
-
-    // ========================================
-    // ATUALIZAR ESTOQUE
-    // ========================================
-
-    function atualizarEstoque() {
-
-      produtosData.forEach(produto => {
-
-        const campo =
-          document.getElementById(
-            `mov-${produto.id}`
-          );
-
-
-        if (campo) {
-
-          const movimento =
-            parseInt(
-              campo.value,
-              10
-            ) || 0;
-
-
-          produto.quantidadeEstoque +=
-            movimento;
-
-
-          if (
-            produto.quantidadeEstoque < 0
-          ) {
-
-            produto.quantidadeEstoque = 0;
-
-          }
+            }
 
         }
 
-      });
+
+        // ============================
+        // MOSTRAR PRODUTOS
+        // ============================
+
+        function renderizarCards() {
+
+            const container =
+                document.getElementById(
+                    "gridProdutos"
+                );
+
+            container.innerHTML = "";
 
 
-      renderizarCards();
+            produtosData.forEach(
+                function (produto) {
+
+                    const card =
+                        document.createElement("div");
+
+                    card.className = "card";
 
 
-      alert(
-        'Estoque atualizado com sucesso!'
-      );
+                    card.innerHTML = `
 
-    }
+                        <img
+                            src="${produto.foto}"
+                            alt="${produto.nome}"
+                        >
 
+                        <h2>
+                            ${produto.nome}
+                        </h2>
 
-    // ========================================
-    // SALVAR ESTOQUE
-    // ========================================
+                        <p>
+                            <strong>Unidade:</strong>
+                            ${produto.unidade}
+                        </p>
 
-    function salvarEstoque() {
+                        <p>
+                            <strong>Preço de compra:</strong>
+                            R$ ${produto.precoCompra.toFixed(2)}
+                        </p>
 
-      const dataStr =
-        "data:text/json;charset=utf-8," +
-        encodeURIComponent(
-          JSON.stringify(
-            produtosData,
-            null,
-            2
-          )
-        );
+                        <p>
+                            <strong>Preço de venda:</strong>
+                            R$ ${produto.precoVenda.toFixed(2)}
+                        </p>
 
+                        <p class="estoque">
+                            Estoque:
+                            ${produto.quantidadeEstoque}
+                        </p>
 
-      const downloadAnchor =
-        document.createElement('a');
+                        <input
+                            type="number"
+                            class="movimento"
+                            id="movimento-${produto.id}"
+                            placeholder="Digite + ou - para movimentar o estoque"
+                        >
 
-
-      downloadAnchor.setAttribute(
-        "href",
-        dataStr
-      );
-
-
-      downloadAnchor.setAttribute(
-        "download",
-        "estoque_atualizado.json"
-      );
-
-
-      document.body.appendChild(
-        downloadAnchor
-      );
+                    `;
 
 
-      downloadAnchor.click();
+                    container.appendChild(card);
+
+                }
+            );
+
+        }
 
 
-      downloadAnchor.remove();
+        // ============================
+        // INCLUIR PRODUTO
+        // ============================
 
-    }
+        function abrirModalProduto() {
+
+            document.getElementById(
+                "modalProduto"
+            ).style.display = "block";
+
+        }
 
 
-    // ========================================
-    // INICIAR
-    // ========================================
+        function fecharModalProduto() {
 
-    document.addEventListener(
-      'DOMContentLoaded',
-      carregarEstoque
-    );
+            document.getElementById(
+                "modalProduto"
+            ).style.display = "none";
 
-  </script>
+        }
+
+
+        function incluirProduto(event) {
+
+            event.preventDefault();
+
+
+            const nome =
+                document.getElementById(
+                    "nomeProduto"
+                ).value.trim();
+
+
+            const foto =
+                document.getElementById(
+                    "fotoProduto"
+                ).value.trim();
+
+
+            const precoCompra =
+                parseFloat(
+                    document.getElementById(
+                        "precoCompra"
+                    ).value
+                );
+
+
+            const precoVenda =
+                parseFloat(
+                    document.getElementById(
+                        "precoVenda"
+                    ).value
+                );
+
+
+            const quantidadeEstoque =
+                parseInt(
+                    document.getElementById(
+                        "quantidadeEstoque"
+                    ).value,
+                    10
+                );
+
+
+            const unidade =
+                document.getElementById(
+                    "unidade"
+                ).value.trim();
+
+
+            const novoProduto = {
+
+                id: Date.now(),
+
+                nome: nome,
+
+                foto: foto,
+
+                precoCompra: precoCompra,
+
+                precoVenda: precoVenda,
+
+                quantidadeEstoque:
+                    quantidadeEstoque,
+
+                unidade: unidade
+
+            };
+
+
+            produtosData.push(
+                novoProduto
+            );
+
+
+            renderizarCards();
+
+
+            fecharModalProduto();
+
+
+            document.getElementById(
+                "formProduto"
+            ).reset();
+
+
+            alert(
+                "Produto incluído com sucesso!"
+            );
+
+        }
+
+
+        // ============================
+        // ATUALIZAR ESTOQUE
+        // ============================
+
+        function atualizarEstoque() {
+
+            produtosData.forEach(
+                function (produto) {
+
+                    const input =
+                        document.getElementById(
+                            `movimento-${produto.id}`
+                        );
+
+
+                    if (input) {
+
+                        const movimento =
+                            parseInt(
+                                input.value
+                            ) || 0;
+
+
+                        produto.quantidadeEstoque +=
+                            movimento;
+
+
+                        if (
+                            produto.quantidadeEstoque < 0
+                        ) {
+
+                            produto.quantidadeEstoque = 0;
+
+                        }
+
+
+                        input.value = "";
+
+                    }
+
+                }
+            );
+
+
+            renderizarCards();
+
+
+            alert(
+                "Estoque atualizado com sucesso!"
+            );
+
+        }
+
+
+        // ============================
+        // SALVAR ESTOQUE EM JSON
+        // ============================
+
+        function salvarEstoque() {
+
+            const dadosJSON =
+                JSON.stringify(
+                    produtosData,
+                    null,
+                    2
+                );
+
+
+            const arquivo =
+                new Blob(
+                    [dadosJSON],
+                    {
+                        type:
+                            "application/json"
+                    }
+                );
+
+
+            const link =
+                document.createElement("a");
+
+
+            link.href =
+                URL.createObjectURL(
+                    arquivo
+                );
+
+
+            link.download =
+                "estoque_atualizado.json";
+
+
+            document.body.appendChild(
+                link
+            );
+
+
+            link.click();
+
+
+            document.body.removeChild(
+                link
+            );
+
+
+            URL.revokeObjectURL(
+                link.href
+            );
+
+
+            alert(
+                "Arquivo JSON salvo com sucesso!"
+            );
+
+        }
+
+    </script>
 
 </body>
 
 </html>
-
-
-
